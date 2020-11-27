@@ -1,6 +1,7 @@
-import dataset
 import datetime
 import random
+
+import dataset
 
 
 class Database:

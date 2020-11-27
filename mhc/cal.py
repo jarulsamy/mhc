@@ -1,4 +1,5 @@
 import datetime
+
 import db
 
 
@@ -16,7 +17,12 @@ def pad_end(text, pad_char, max_len, start=None, end=None):
 
 
 class Calendar:
-    def __init__(self, db: db.Database, start_date: datetime.date = None, end_date: datetime.date = None):
+    def __init__(
+        self,
+        db: db.Database,
+        start_date: datetime.date = None,
+        end_date: datetime.date = None,
+    ):
         self._db = db
         self._start_date = start_date
         self._end_date = end_date
@@ -27,7 +33,15 @@ class Calendar:
         if not self._start_date:
             self._start_date = self._end_date - datetime.timedelta(days=365)
 
-        self.colors = ("#691A1A", "#9F1E1E", "#C9231A", "#E6E620", "#4A8C19", "#47CB21", "#53FF00")
+        self.colors = (
+            "#691A1A",
+            "#9F1E1E",
+            "#C9231A",
+            "#E6E620",
+            "#4A8C19",
+            "#47CB21",
+            "#53FF00",
+        )
 
     @property
     def start_date(self):
@@ -60,19 +74,46 @@ class Calendar:
         """Print a color spectrum to check if the terminal supports all the colors"""
         for i in self.colors:
             print(f"{i}: {self._colored(i, '◼')}")
-        print(f"If you can see all {len(self.colors)} colors, your terminal is working correctly")
+        print(
+            f"If you can see all {len(self.colors)} colors, your terminal is working correctly"
+        )
 
     def __str__(self):
         days_of_week = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-        months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-        marks = {"nw": "╔", "n": "═", "ne": "╗", "e": "║", "se": "╝", "s": "═", "sw": "╚", "w": "║", "b": " "}
+        months = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+        ]
+        marks = {
+            "nw": "╔",
+            "n": "═",
+            "ne": "╗",
+            "e": "║",
+            "se": "╝",
+            "s": "═",
+            "sw": "╚",
+            "w": "║",
+            "b": " ",
+        }
         # Extra symbols: ["⬚", "▢", "▤", "▣", "◼"]
         full_marker = "◼"
         empty_marker = "⬚"
 
         self._data = self._db.get_range(self._start_date, self._end_date)
 
-        current_date = self.start_date - datetime.timedelta((self.start_date.weekday() + 1) % 7)
+        current_date = self.start_date - datetime.timedelta(
+            (self.start_date.weekday() + 1) % 7
+        )
         num_weeks, leftover_days = divmod(abs(self.end_date - current_date).days, 7)
         if leftover_days > 0:
             num_weeks += 1
@@ -97,7 +138,9 @@ class Calendar:
                         elif rating >= 3:
                             week.append(self._colored(self.colors[-1], full_marker))
                         else:
-                            week.append(self._colored(self.colors[rating + 3], full_marker))
+                            week.append(
+                                self._colored(self.colors[rating + 3], full_marker)
+                            )
                     else:
                         week.append(empty_marker)
 
@@ -133,24 +176,32 @@ class Calendar:
                 data_len += 2
             data_lines.append(temp_line)
 
-        start_end_line = (
-            f"Start date: {self.start_date.strftime('%m/%d/%Y')} | End date: {self.end_date.strftime('%m/%d/%Y')}"
-        )
+        start_end_line = f"Start date: {self.start_date.strftime('%m/%d/%Y')} | End date: {self.end_date.strftime('%m/%d/%Y')}"
 
         # Get the max width to keep the size of the box consistent
-        max_width = len(max((month_line, " " * (data_len + 3), start_end_line), key=len))
+        max_width = len(
+            max((month_line, " " * (data_len + 3), start_end_line), key=len)
+        )
 
         # Assemble the final output by combining all the previous lines
         # and padding them appropiately
         output = pad_end("", marks["n"], max_width, marks["nw"], marks["ne"])
-        output += pad_end(month_line, " ", max_width - len(month_line), marks["w"], marks["w"])
+        output += pad_end(
+            month_line, " ", max_width - len(month_line), marks["w"], marks["w"]
+        )
 
         for i in data_lines:
             # HACK: -2 for some reason needs to be there to get spacing correct
             output += pad_end(i, " ", max_width - data_len - 2, marks["w"], marks["w"])
 
         output += pad_end("", "-", (max_width), marks["w"], marks["w"])
-        output += pad_end(start_end_line, " ", (max_width - len(start_end_line)), marks["w"], marks["w"])
+        output += pad_end(
+            start_end_line,
+            " ",
+            (max_width - len(start_end_line)),
+            marks["w"],
+            marks["w"],
+        )
         output += marks["sw"] + (marks["n"] * (max_width)) + marks["se"] + "\n"
 
         return output

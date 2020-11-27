@@ -18,15 +18,14 @@ Files:
     cal.db - persistent storage of calendar data
     config.yaml - config file
 """
-
-
 import datetime
-from pathlib import Path
 import os
-from db import Database
-from cal import Calendar
-from docopt import docopt
 import random
+from pathlib import Path
+
+from cal import Calendar
+from db import Database
+from docopt import docopt
 
 
 def get_rating(day="your day"):
@@ -89,7 +88,9 @@ elif args.get("view"):
 
     if args.get("--start") is not None:
         try:
-            start_date = datetime.datetime.strptime(args.get("--start"), "%m-%d-%Y").date()
+            start_date = datetime.datetime.strptime(
+                args.get("--start"), "%m-%d-%Y"
+            ).date()
         except ValueError as e:
             raise ValueError("Incorrect date format, must be MM-DD-YYYY") from e
 
